@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarIcon, ClockIcon, DollarSign } from "lucide-react";
+import { useState } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ interface DoctorCardProps {
 }
 
 const DoctorCard = ({ doctor }: DoctorCardProps) => {
+  const [isUpsertDoctorFormOpen, setIsUpsertDoctorFormOpen] = useState(false);
   const doctorInitials = doctor.name
     .split(" ")
     .map((name) => name[0])
@@ -64,11 +66,21 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
       </CardContent>
       <Separator />
       <CardFooter>
-        <Dialog>
+        <Dialog
+          open={isUpsertDoctorFormOpen}
+          onOpenChange={setIsUpsertDoctorFormOpen}
+        >
           <DialogTrigger asChild>
             <Button className="w-full">Ver detalhes</Button>
           </DialogTrigger>
-          <UpsertDoctorForm />
+          <UpsertDoctorForm
+            doctor={{
+              ...doctor,
+              availableFromTime: availability.from.format("HH:mm:ss"),
+              availableToTime: availability.to.format("HH:mm:ss"),
+            }}
+            onSuccess={() => setIsUpsertDoctorFormOpen(false)}
+          />
         </Dialog>
       </CardFooter>
     </Card>
