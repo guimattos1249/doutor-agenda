@@ -25,7 +25,7 @@ export const deletePatient = actionClient
       throw new Error("Unauthorized");
     }
 
-    const patient = await db.query.doctorsTable.findFirst({
+    const patient = await db.query.patientsTable.findFirst({
       where: eq(patientsTable.id, parsedInput.id),
     });
 
