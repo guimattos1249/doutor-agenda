@@ -56,13 +56,15 @@ export const getAvailableTimes = actionClient
     const appointments = await db.query.appointmentsTable.findMany({
       where: and(
         eq(appointmentsTable.doctorId, doctorId),
-        eq(appointmentsTable.date, new Date(date)),
+        // eq(appointmentsTable.date, new Date(parsedInput.date)),
       ),
     });
 
-    const appointmentsOnTime = appointments.map((appointment) =>
-      dayjs(appointment.date).format("HH:mm:ss"),
-    );
+    const appointmentsOnTime = appointments
+      .filter((appointment) => {
+        return dayjs(appointment.date).isSame(parsedInput.date, "day");
+      })
+      .map((appointment) => dayjs(appointment.date).format("HH:mm:ss"));
 
     const timeSlots = generateTimeSlots();
 
