@@ -143,6 +143,23 @@ export function AddAppointmentForm({
     });
   };
 
+  const isDateAvailable = (date: Date) => {
+    if (!selectedDoctorId) return false;
+
+    const selectedDoctor = doctors.find(
+      (doctor) => doctor.id === selectedDoctorId,
+    );
+
+    const dayOfWeek = date.getDay();
+
+    if (!selectedDoctor) return undefined;
+
+    return (
+      dayOfWeek >= (selectedDoctor?.availableFromWeekDay ?? 0) &&
+      dayOfWeek <= (selectedDoctor?.availableToWeekDay ?? 6)
+    );
+  };
+
   const isDateTimeEnabled = selectedPatientId && selectedDoctorId;
 
   return (
@@ -265,10 +282,9 @@ export function AddAppointmentForm({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      // disabled={(date) =>
-                      //   date < new Date() || !isDateAvailable(date)
-                      // }
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) =>
+                        date < new Date() || !isDateAvailable(date)
+                      }
                       initialFocus
                       locale={ptBR}
                     />
