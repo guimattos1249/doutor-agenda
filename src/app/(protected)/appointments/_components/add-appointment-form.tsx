@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import dayjs from "dayjs";
 import { CalendarIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
@@ -10,6 +12,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { addAppointment } from "@/actions/create-appointment";
+import { getAvailableTimes } from "@/actions/get-available-times";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -88,6 +91,16 @@ export function AddAppointmentForm({
 
   const selectedDoctorId = form.watch("doctorId");
   const selectedPatientId = form.watch("patientId");
+  const selectedDate = form.watch("date");
+
+  const { data: availableTimes } = useQuery({
+    queryKey: ["available-times", selectedDate, selectedDoctorId],
+    queryFn: () =>
+      getAvailableTimes({
+        date: dayjs(selectedDate).format("YYYY-MM-DD"),
+        doctorId: selectedDoctorId,
+      }),
+  });
 
   // Atualizar o preço quando o médico for selecionado
   useEffect(() => {
@@ -275,8 +288,7 @@ export function AddAppointmentForm({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  // disabled={!isDateTimeEnabled || !selectedDate}
-                  disabled={!isDateTimeEnabled}
+                  disabled={!isDateTimeEnabled || !selectedDate}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -284,7 +296,7 @@ export function AddAppointmentForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {/* {availableTimes?.data?.map((time) => (
+                    {availableTimes?.data?.map((time) => (
                       <SelectItem
                         key={time.value}
                         value={time.value}
@@ -292,23 +304,7 @@ export function AddAppointmentForm({
                       >
                         {time.label} {!time.available && "(Indisponível)"}
                       </SelectItem>
-                    ))} */}
-                    <SelectItem value="05:00:00">05:00</SelectItem>
-                    <SelectItem value="05:30:00">05:30</SelectItem>
-                    <SelectItem value="06:00:00">06:00</SelectItem>
-                    <SelectItem value="06:30:00">06:30</SelectItem>
-                    <SelectItem value="07:00:00">07:00</SelectItem>
-                    <SelectItem value="07:30:00">07:30</SelectItem>
-                    <SelectItem value="08:00:00">08:00</SelectItem>
-                    <SelectItem value="08:30:00">08:30</SelectItem>
-                    <SelectItem value="09:00:00">09:00</SelectItem>
-                    <SelectItem value="09:30:00">09:30</SelectItem>
-                    <SelectItem value="10:00:00">10:00</SelectItem>
-                    <SelectItem value="10:30:00">10:30</SelectItem>
-                    <SelectItem value="11:00:00">11:00</SelectItem>
-                    <SelectItem value="11:30:00">11:30</SelectItem>
-                    <SelectItem value="12:00:00">12:00</SelectItem>
-                    <SelectItem value="12:30:00">12:30</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />

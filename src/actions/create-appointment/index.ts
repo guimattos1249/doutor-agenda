@@ -1,5 +1,6 @@
 "use server";
 
+import dayjs from "dayjs";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -28,10 +29,15 @@ export const addAppointment = actionClient
     //   date: dayjs(parsedInput.date).format("YYYY-MM-DD"),
     // });
 
+    const appointmentDateTime = dayjs(parsedInput.date)
+      .set("hour", parseInt(parsedInput.time.split(":")[0]))
+      .set("minute", parseInt(parsedInput.time.split(":")[1]))
+      .toDate();
+
     await db.insert(appointmentsTable).values({
       ...parsedInput,
       clinicId: session?.user.clinic?.id,
-      date: new Date(parsedInput.date),
+      date: appointmentDateTime,
     });
     revalidatePath("/appointments");
   });
