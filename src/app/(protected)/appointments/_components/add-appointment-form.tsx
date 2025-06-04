@@ -100,6 +100,7 @@ export function AddAppointmentForm({
         date: dayjs(selectedDate).format("YYYY-MM-DD"),
         doctorId: selectedDoctorId,
       }),
+    enabled: !!selectedDate && !!selectedDoctorId,
   });
 
   // Atualizar o preço quando o médico for selecionado
