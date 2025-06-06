@@ -3,6 +3,7 @@
 import { addMonths, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { parseAsIsoDate, useQueryState } from "nuqs";
 import * as React from "react";
 import { DateRange } from "react-day-picker";
@@ -19,24 +20,26 @@ import { cn } from "@/lib/utils";
 export function DatePicker({
   className,
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const router = useRouter();
   const today = React.useMemo(() => new Date(), []);
   const nextMonth = React.useMemo(() => addMonths(today, 1), [today]);
 
-  const [date, setDate] = React.useState<DateRange | undefined>({
+  const [date, setDate] = React.useState<DateRange>({
     from: today,
     to: nextMonth,
   });
 
   const [from] = useQueryState("from", parseAsIsoDate.withDefault(today));
+
   const [to] = useQueryState("to", parseAsIsoDate.withDefault(nextMonth));
 
   const handleDateSelect = async (dateRange: DateRange | undefined) => {
-    setDate(dateRange);
-
     if (!dateRange) return;
 
+    setDate(dateRange);
+
     try {
-      const searchParams = new URLSearchParams(window.location.search);
+      const searchParams = new URLSearchParams();
 
       if (dateRange.from) {
         searchParams.set("from", dateRange.from.toISOString().split("T")[0]);
@@ -46,15 +49,23 @@ export function DatePicker({
         searchParams.set("to", dateRange.to.toISOString().split("T")[0]);
       }
 
-      const newUrl = `${window.location.pathname}?${searchParams.toString()}`;
-      window.history.pushState({}, "", newUrl);
+      // Use router.push para navegar para a mesma página com os novos parâmetros
+      router.push(`/dashboard?${searchParams.toString()}`);
     } catch (error) {
       console.error("Error updating dates:", error);
     }
   };
 
+  // Initialize dates on mount
   React.useEffect(() => {
-    setDate({ from, to });
+    handleDateSelect({ from: today, to: nextMonth });
+  }, []);
+
+  // Keep local state in sync with URL params
+  React.useEffect(() => {
+    if (from && to) {
+      setDate({ from, to });
+    }
   }, [from, to]);
 
   return (
