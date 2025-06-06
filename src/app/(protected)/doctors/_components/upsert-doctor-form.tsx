@@ -98,8 +98,8 @@ const UpsertDoctorForm = ({
     defaultValues: {
       name: doctor?.name ?? "",
       specialty: doctor?.specialty ?? "",
-      appointmentPrice: doctor?.appointmentPriceInCent
-        ? doctor.appointmentPriceInCent / 100
+      appointmentPrice: doctor?.appointmentPriceInCents
+        ? doctor.appointmentPriceInCents / 100
         : 0,
       availableFromWeekDay: doctor?.availableFromWeekDay?.toString() ?? "1",
       availableToWeekDay: doctor?.availableToWeekDay?.toString() ?? "5",
@@ -113,8 +113,8 @@ const UpsertDoctorForm = ({
       form.reset({
         name: doctor?.name ?? "",
         specialty: doctor?.specialty ?? "",
-        appointmentPrice: doctor?.appointmentPriceInCent
-          ? doctor.appointmentPriceInCent / 100
+        appointmentPrice: doctor?.appointmentPriceInCents
+          ? doctor.appointmentPriceInCents / 100
           : 0,
         availableFromWeekDay: doctor?.availableFromWeekDay?.toString() ?? "1",
         availableToWeekDay: doctor?.availableToWeekDay?.toString() ?? "5",
@@ -157,7 +157,7 @@ const UpsertDoctorForm = ({
       ...values,
       availableFromWeekDay: parseInt(values.availableFromWeekDay),
       availableToWeekDay: parseInt(values.availableToWeekDay),
-      appointmentPriceInCent: values.appointmentPrice * 100,
+      appointmentPriceInCents: values.appointmentPrice * 100,
     });
   };
 

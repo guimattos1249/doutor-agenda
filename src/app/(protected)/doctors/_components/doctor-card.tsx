@@ -63,7 +63,7 @@ const DoctorCard = ({ doctor }: DoctorCardProps) => {
         </Badge>
         <Badge variant="outline">
           <DollarSign className="mr-1" />
-          {formatCurrencyInCents(doctor.appointmentPriceInCent)}
+          {formatCurrencyInCents(doctor.appointmentPriceInCents)}
         </Badge>
       </CardContent>
       <Separator />
