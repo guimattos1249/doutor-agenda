@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
-import { and, count, eq, gte, lte, sql, sum } from "drizzle-orm";
+import { CalendarIcon } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import {
   PageActions,
   PageContent,
@@ -12,13 +14,15 @@ import {
   PageTitle,
 } from "@/components/ui/page-container";
 import { PageContainer } from "@/components/ui/page-container";
-import { db } from "@/db";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import { getDashboard } from "@/data/getDashboard";
 import { auth } from "@/lib/auth";
 
+import { columns } from "../appointments/_components/table-columns";
 import { AppointmentsChart } from "./_components/appointments-chart";
 import { DatePicker } from "./_components/date-picker";
 import StatsCard from "./_components/stats-card";
+import { TopDoctors } from "./_components/top-doctors";
+import TopSpecialties from "./_components/top-specialties";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -49,76 +53,26 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     );
   }
 
-  // Ajusta as datas para incluir o dia inteiro
-  const fromDate = dayjs(from).startOf("day").toDate();
-  const toDate = dayjs(to).endOf("day").toDate();
-
-  const [[totalRevenue], [totalAppointments], [totalPatients], [totalDoctors]] =
-    await Promise.all([
-      db
-        .select({
-          total: sum(appointmentsTable.appointmentPriceInCents),
-        })
-        .from(appointmentsTable)
-        .where(
-          and(
-            eq(appointmentsTable.clinicId, session.user.clinic.id),
-            gte(appointmentsTable.date, fromDate),
-            lte(appointmentsTable.date, toDate),
-          ),
-        ),
-      db
-        .select({
-          total: count(),
-        })
-        .from(appointmentsTable)
-        .where(
-          and(
-            eq(appointmentsTable.clinicId, session.user.clinic.id),
-            gte(appointmentsTable.date, fromDate),
-            lte(appointmentsTable.date, toDate),
-          ),
-        ),
-      db
-        .select({
-          total: count(),
-        })
-        .from(patientsTable)
-        .where(eq(patientsTable.clinicId, session.user.clinic.id)),
-      db
-        .select({
-          total: count(),
-        })
-        .from(doctorsTable)
-        .where(eq(doctorsTable.clinicId, session.user.clinic.id)),
-    ]);
-
-  const chartStartData = dayjs(from)
-    .subtract(10, "days")
-    .startOf("day")
-    .toDate();
-  // const chartToday = dayjs(new Date()).startOf("day").toDate();
-  const chartEndData = dayjs(to).add(10, "days").endOf("day").toDate();
-
-  const dailyAppointmentsData = await db
-    .select({
-      date: sql<string>`DATE(${appointmentsTable.date})`.as("date"),
-      appointments: count(appointmentsTable.id),
-      revenue:
-        sql<number>`SUM(${appointmentsTable.appointmentPriceInCents})`.as(
-          "revenue",
-        ),
-    })
-    .from(appointmentsTable)
-    .where(
-      and(
-        eq(appointmentsTable.clinicId, session.user.clinic.id),
-        gte(appointmentsTable.date, chartStartData),
-        lte(appointmentsTable.date, chartEndData),
-      ),
-    )
-    .groupBy(sql<string>`DATE(${appointmentsTable.date})`)
-    .orderBy(sql<string>`DATE(${appointmentsTable.date})`);
+  const {
+    totalRevenue,
+    totalAppointments,
+    totalPatients,
+    totalDoctors,
+    topDoctors,
+    dailyAppointmentsData,
+    todayAppointments,
+    topSpecialties,
+  } = await getDashboard({
+    from,
+    to,
+    session: {
+      user: {
+        clinic: {
+          id: session.user.clinic.id,
+        },
+      },
+    },
+  });
 
   return (
     <PageContainer>
@@ -140,8 +94,27 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
           totalPatients={totalPatients.total}
           totalDoctors={totalDoctors.total}
         />
-        <div className="grid grid-cols-[2.25fr_1fr]">
+        <div className="grid grid-cols-[2.25fr_1fr] gap-2">
           <AppointmentsChart dailyAppointmentsData={dailyAppointmentsData} />
+          <TopDoctors doctors={topDoctors} />
+        </div>
+        <div className="grid grid-cols-[2.25fr_1fr] gap-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <div className="flex items-center gap-3">
+                  <CalendarIcon className="text-muted-foreground" />
+                  <CardTitle className="text-base">
+                    Agendamentos de Hoje
+                  </CardTitle>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DataTable columns={columns} data={todayAppointments} />
+            </CardContent>
+          </Card>
+          <TopSpecialties specialties={topSpecialties} />
         </div>
       </PageContent>
     </PageContainer>
