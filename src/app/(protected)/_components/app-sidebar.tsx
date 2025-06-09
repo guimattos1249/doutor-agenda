@@ -108,7 +108,7 @@ export function AppSidebar() {
                 >
                   <Link href="/subscription">
                     <Gem />
-                    <span>planos</span>
+                    <span>Planos</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
