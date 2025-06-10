@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/page-container";
 import { PageContainer } from "@/components/ui/page-container";
 import { getDashboard } from "@/data/getDashboard";
+import WithAuthentication from "@/hocs/with-authentication";
 import { auth } from "@/lib/auth";
 
 import { columns } from "../appointments/_components/table-columns";
@@ -75,49 +76,53 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   });
 
   return (
-    <PageContainer>
-      <PageHeader>
-        <PageHeaderContent>
-          <PageTitle>Dashboard</PageTitle>
-          <PageDescription>
-            Tenha uma visão geral dos pacientes e agendamentos da sua clínica
-          </PageDescription>
-        </PageHeaderContent>
-        <PageActions>
-          <DatePicker />
-        </PageActions>
-      </PageHeader>
-      <PageContent>
-        <StatsCard
-          totalRevenue={totalRevenue.total ? Number(totalRevenue.total) : null}
-          totalAppointments={totalAppointments.total}
-          totalPatients={totalPatients.total}
-          totalDoctors={totalDoctors.total}
-        />
-        <div className="grid grid-cols-[2.25fr_1fr] gap-2">
-          <AppointmentsChart dailyAppointmentsData={dailyAppointmentsData} />
-          <TopDoctors doctors={topDoctors} />
-        </div>
-        <div className="grid grid-cols-[2.25fr_1fr] gap-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <div className="flex items-center gap-3">
-                  <CalendarIcon className="text-muted-foreground" />
-                  <CardTitle className="text-base">
-                    Agendamentos de Hoje
-                  </CardTitle>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DataTable columns={columns} data={todayAppointments} />
-            </CardContent>
-          </Card>
-          <TopSpecialties specialties={topSpecialties} />
-        </div>
-      </PageContent>
-    </PageContainer>
+    <WithAuthentication mustHaveClinic mustHavePlan>
+      <PageContainer>
+        <PageHeader>
+          <PageHeaderContent>
+            <PageTitle>Dashboard</PageTitle>
+            <PageDescription>
+              Tenha uma visão geral dos pacientes e agendamentos da sua clínica
+            </PageDescription>
+          </PageHeaderContent>
+          <PageActions>
+            <DatePicker />
+          </PageActions>
+        </PageHeader>
+        <PageContent>
+          <StatsCard
+            totalRevenue={
+              totalRevenue.total ? Number(totalRevenue.total) : null
+            }
+            totalAppointments={totalAppointments.total}
+            totalPatients={totalPatients.total}
+            totalDoctors={totalDoctors.total}
+          />
+          <div className="grid grid-cols-[2.25fr_1fr] gap-2">
+            <AppointmentsChart dailyAppointmentsData={dailyAppointmentsData} />
+            <TopDoctors doctors={topDoctors} />
+          </div>
+          <div className="grid grid-cols-[2.25fr_1fr] gap-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <div className="flex items-center gap-3">
+                    <CalendarIcon className="text-muted-foreground" />
+                    <CardTitle className="text-base">
+                      Agendamentos de Hoje
+                    </CardTitle>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DataTable columns={columns} data={todayAppointments} />
+              </CardContent>
+            </Card>
+            <TopSpecialties specialties={topSpecialties} />
+          </div>
+        </PageContent>
+      </PageContainer>
+    </WithAuthentication>
   );
 };
 

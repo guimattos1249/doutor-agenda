@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/page-container";
 import { db } from "@/db";
 import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import WithAuthentication from "@/hocs/with-authentication";
 import { auth } from "@/lib/auth";
 
 import AddAppointmentButton from "./_components/add-appointments";
@@ -46,22 +47,24 @@ const AppointmentsPage = async () => {
     }),
   ]);
   return (
-    <PageContainer>
-      <PageHeader>
-        <PageHeaderContent>
-          <PageTitle>Agendamentos</PageTitle>
-          <PageDescription>
-            Gerencie os agendamentos da sua clínica
-          </PageDescription>
-        </PageHeaderContent>
-        <PageActions>
-          <AddAppointmentButton patients={patients} doctors={doctors} />
-        </PageActions>
-      </PageHeader>
-      <PageContent>
-        <DataTable columns={columns} data={appointments} />
-      </PageContent>
-    </PageContainer>
+    <WithAuthentication mustHaveClinic mustHavePlan>
+      <PageContainer>
+        <PageHeader>
+          <PageHeaderContent>
+            <PageTitle>Agendamentos</PageTitle>
+            <PageDescription>
+              Gerencie os agendamentos da sua clínica
+            </PageDescription>
+          </PageHeaderContent>
+          <PageActions>
+            <AddAppointmentButton patients={patients} doctors={doctors} />
+          </PageActions>
+        </PageHeader>
+        <PageContent>
+          <DataTable columns={columns} data={appointments} />
+        </PageContent>
+      </PageContainer>
+    </WithAuthentication>
   );
 };
 

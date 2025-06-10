@@ -2,10 +2,10 @@
 
 import { loadStripe } from "@stripe/stripe-js";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 
 import { createStripeCheckout } from "@/actions/create-stripe-checkout";
-// import { createStripeCheckout } from "@/actions/create-stripe-checkout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -13,14 +13,16 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 interface SubscriptionPlanProps {
   active?: boolean;
   className?: string;
-  // userEmail: string;
+  userEmail: string;
 }
 
 export function SubscriptionPlan({
   active = false,
   className,
-  // userEmail,
+  userEmail,
 }: SubscriptionPlanProps) {
+  const router = useRouter();
+
   const createStripeCheckoutAction = useAction(createStripeCheckout, {
     onSuccess: async ({ data }) => {
       if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
@@ -54,11 +56,11 @@ export function SubscriptionPlan({
     createStripeCheckoutAction.execute();
   };
 
-  // const handleManagePlanClick = () => {
-  //   router.push(
-  //     `${process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL}?prefilled_email=${userEmail}`,
-  //   );
-  // };
+  const handleManagePlanClick = () => {
+    router.push(
+      `${process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL}?prefilled_email=${userEmail}`,
+    );
+  };
 
   return (
     <Card className={className}>
@@ -97,7 +99,7 @@ export function SubscriptionPlan({
             className="w-full"
             variant="outline"
             disabled={createStripeCheckoutAction.isExecuting}
-            onClick={active ? () => {} : handleSubscribeClick}
+            onClick={active ? handleManagePlanClick : handleSubscribeClick}
           >
             {createStripeCheckoutAction.isExecuting ? (
               <Loader2 className="mr-1 h-4 w-4 animate-spin" />

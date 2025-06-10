@@ -9,6 +9,7 @@ import {
   PageHeaderContent,
   PageTitle,
 } from "@/components/ui/page-container";
+import WithAuthentication from "@/hocs/with-authentication";
 import { auth } from "@/lib/auth";
 
 import { SubscriptionPlan } from "./_components/subscription-plan";
@@ -25,21 +26,23 @@ const SubscriptionPage = async () => {
     redirect("/clinic-form");
   }
   return (
-    <PageContainer>
-      <PageHeader>
-        <PageHeaderContent>
-          <PageTitle>Planos</PageTitle>
-          <PageDescription>Gerencie os planos da sua clínica</PageDescription>
-        </PageHeaderContent>
-      </PageHeader>
-      <PageContent>
-        <SubscriptionPlan
-          className="w-[350px]"
-          active={session.user.plan === "essential"}
-          // userEmail={session.user.email}
-        />
-      </PageContent>
-    </PageContainer>
+    <WithAuthentication mustHaveClinic mustHavePlan>
+      <PageContainer>
+        <PageHeader>
+          <PageHeaderContent>
+            <PageTitle>Planos</PageTitle>
+            <PageDescription>Gerencie os planos da sua clínica</PageDescription>
+          </PageHeaderContent>
+        </PageHeader>
+        <PageContent>
+          <SubscriptionPlan
+            className="w-[350px]"
+            active={session.user.plan === "essential"}
+            userEmail={session.user.email}
+          />
+        </PageContent>
+      </PageContainer>
+    </WithAuthentication>
   );
 };
 
